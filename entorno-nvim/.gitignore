@@ -1,0 +1,56 @@
+# Copias locales previas a modificaciones
+.backups/
+.xdg/
+.tools/
+**/node_modules/
+
+# Archivos generados por pruebas y editores
+*.log
+.nvimlog
+*.swp
+*.swo
+.DS_Store
+*~
+*.bak
+
+# PDF generados desde los ejemplos Markdown
+examples/**/*.pdf
+
+# Secretos y configuraciones privadas: nunca deben entrar en el repositorio.
+.env
+.env.*
+**/.env
+**/.env.*
+*.pem
+*.key
+*.p12
+*.p8
+*.pfx
+*.jks
+*.keystore
+id_rsa
+id_ed25519
+id_ecdsa
+id_dsa
+credentials.json
+**/.ssh/
+**/.gnupg/
+**/.password-store/
+**/.git-credentials
+**/.netrc
+**/.npmrc
+**/.pypirc
+**/.pgpass
+**/.my.cnf
+**/.s3cfg
+**/.kube/config
+**/.docker/config.json
+
+# Estado y configuración privada local de agentes (solo en la raíz).
+/.codex/
+/.claude/
+/.opencode/
+/.jarvis/
+/lazygit/
+/.config/opencode/
+/.config/jarvis/

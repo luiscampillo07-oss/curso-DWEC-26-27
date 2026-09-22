@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="$if(lang)$$lang$$else$es$endif$">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>$if(pagetitle)$$pagetitle$$else$Documento$endif$</title>
+$for(css)$
+  <link rel="stylesheet" href="$css$">
+$endfor$
+$if(highlighting-css)$
+  <style>$highlighting-css$</style>
+$endif$
+  <style>
+    :root {
+      --cabecera-izquierda: "$if(module_css)$$module_css$$endif$";
+      --cabecera-derecha: "$if(centre_css)$$centre_css$$endif$";
+      --pie-izquierda: "$if(teacher_css)$Profesor: $teacher_css$$endif$";
+    }
+  </style>
+</head>
+<body>
+  <main>
+$body$
+  </main>
+</body>
+</html>

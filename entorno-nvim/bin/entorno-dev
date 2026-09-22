@@ -1,0 +1,80 @@
+#!/bin/sh
+set -eu
+
+# Resolver el archivo real permite instalar este lanzador mediante un enlace
+# simbolico en ~/.local/bin sin fijar la ubicacion del repositorio.
+source_path=$0
+while [ -L "$source_path" ]; do
+  source_dir=$(CDPATH= cd "$(dirname "$source_path")" && pwd -P)
+  link_target=$(readlink "$source_path")
+  case "$link_target" in
+    /*) source_path=$link_target ;;
+    *) source_path=$source_dir/$link_target ;;
+  esac
+done
+
+bin_dir=$(CDPATH= cd "$(dirname "$source_path")" && pwd -P)
+project_root=$(dirname "$bin_dir")
+project_launcher=$project_root/scripts/proyecto.sh
+
+[ -x "$project_launcher" ] || {
+  printf '%s\n' "Error: no se encuentra el lanzador del proyecto: $project_launcher" >&2
+  exit 1
+}
+
+mode=tmux
+choose=0
+profile=${ENTORNO_PERFIL:-profesor}
+ai=${ENTORNO_IA:-}
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+  -h | --help)
+    cat <<'EOF'
+Uso:
+  entorno-dev [opciones] [RUTA]
+
+Sin opciones conserva el entorno completo y tmux con tres paneles.
+  --perfil inicial|dwec|si|profesor   Perfil (predeterminado: profesor)
+  --tmux                            Sesion tmux (predeterminado)
+  --sin-tmux                        Solo el editor
+  --sin-ia                          Deshabilita IA y su panel
+  --ia                              Habilita la integracion IA explicitamente
+  --elegir                          Selector de proyectos en tmux
+
+Para abrir archivos concretos: scripts/arrancar.sh archivo [opciones Neovim]
+EOF
+    exit 0 ;;
+  --perfil)
+    [ "$#" -ge 2 ] || { printf '%s\n' 'Error: falta el perfil.' >&2; exit 2; }
+    profile=$2; shift 2 ;;
+  --tmux) mode=tmux; shift ;;
+  --sin-tmux) mode=editor; shift ;;
+  --sin-ia) ai=0; shift ;;
+  --ia) ai=1; shift ;;
+  --elegir)
+    choose=1; mode=tmux; shift ;;
+  --) shift; break ;;
+  -*) printf 'Error: opcion desconocida: %s\n' "$1" >&2; exit 2 ;;
+  *) break ;;
+  esac
+done
+case "$profile" in
+  inicial | dwec | si | profesor) ;;
+  *) printf 'Error: perfil desconocido: %s\n' "$profile" >&2; exit 2 ;;
+esac
+[ "$#" -le 1 ] || { printf '%s\n' 'Error: se admite una sola carpeta.' >&2; exit 2; }
+if [ -z "$ai" ]; then
+  if [ "$profile" = profesor ]; then ai=1; else ai=0; fi
+fi
+export ENTORNO_PERFIL="$profile" ENTORNO_IA="$ai"
+if [ "$choose" = 1 ]; then
+  [ "$#" -eq 0 ] || { printf '%s\n' 'Error: --elegir no admite una carpeta.' >&2; exit 2; }
+  exec "$project_launcher"
+fi
+if [ "$mode" = tmux ]; then
+  exec "$project_launcher" "${1:-.}"
+fi
+target=${1:-.}
+case "$target" in -*) target=./$target ;; esac
+cd "$target" || exit 1
+exec "$project_root/scripts/arrancar.sh"
