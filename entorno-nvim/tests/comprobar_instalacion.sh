@@ -23,6 +23,14 @@ cleanup() {
 trap cleanup EXIT HUP INT TERM
 
 mkdir -p "$TEST_TOOLS" "$TEST_XDG/data/nvim/lazy" "$TEST_XDG/data/nvim/site/parser"
+mkdir -p "$TEST_ROOT/bin"
+# La prueba valida el carril local, no el gestor de paquetes del anfitrion.
+# ShellCheck se comprueba funcionalmente en la fase SI; aqui basta un ejecutable.
+if [ -x /usr/bin/true ]; then
+  ln -s /usr/bin/true "$TEST_ROOT/bin/shellcheck"
+else
+  ln -s /bin/true "$TEST_ROOT/bin/shellcheck"
+fi
 
 HOME="$TEST_HOME" "$PROJECT_ROOT/scripts/instalar-entorno-dev.sh" >/dev/null
 [ -L "$TEST_HOME/.local/bin/entorno-dev" ]
@@ -47,6 +55,24 @@ if HOME="$FOREIGN_LINK_HOME" "$PROJECT_ROOT/scripts/instalar-entorno-dev.sh" >/d
   exit 1
 fi
 [ "$(readlink "$FOREIGN_LINK_HOME/.local/bin/entorno-dev")" = "$TEST_ROOT/lanzador-ajeno" ]
+
+# Carpeta del repositorio movida o borrada: el enlace roto se actualiza.
+MOVED_HOME="$TEST_ROOT/home-movido"
+mkdir -p "$MOVED_HOME/.local/bin"
+ln -s "$TEST_ROOT/copia-movida/bin/entorno-dev" "$MOVED_HOME/.local/bin/entorno-dev"
+HOME="$MOVED_HOME" "$PROJECT_ROOT/scripts/instalar-entorno-dev.sh" >/dev/null
+[ "$(readlink "$MOVED_HOME/.local/bin/entorno-dev")" = "$PROJECT_ROOT/bin/entorno-dev" ]
+
+# Otra copia existente: sin terminal no se sustituye y se explica el arreglo.
+OTHER_HOME="$TEST_ROOT/home-otra-copia"
+mkdir -p "$OTHER_HOME/.local/bin" "$TEST_ROOT/otra-copia/bin"
+cp "$PROJECT_ROOT/bin/entorno-dev" "$TEST_ROOT/otra-copia/bin/entorno-dev"
+ln -s "$TEST_ROOT/otra-copia/bin/entorno-dev" "$OTHER_HOME/.local/bin/entorno-dev"
+if HOME="$OTHER_HOME" "$PROJECT_ROOT/scripts/instalar-entorno-dev.sh" </dev/null >/dev/null 2>&1; then
+  printf '%s\n' "Error: el instalador sustituiria otra copia sin confirmacion." >&2
+  exit 1
+fi
+[ "$(readlink "$OTHER_HOME/.local/bin/entorno-dev")" = "$TEST_ROOT/otra-copia/bin/entorno-dev" ]
 
 for directory in "tree-sitter-cli-$ENTORNO_TREE_SITTER_VERSION"; do
   [ -d "$SOURCE_TOOLS/$directory" ] || {
@@ -126,5 +152,26 @@ tmux -L "$TMUX_SOCKET" kill-server
 HOME="$TEST_HOME" "$PROJECT_ROOT/scripts/markdown-pdf.sh" \
   "$PROJECT_ROOT/examples/examen/examen2.md" "$TEST_ROOT/examen2.pdf" >/dev/null
 [ -s "$TEST_ROOT/examen2.pdf" ]
+
+# Los carriles docentes deben poder repetirse tras un git pull: conservan lo
+# correcto y completan lo nuevo sin tocar configuracion personal ni el enlace.
+for perfil in alumno dwec; do
+  for intento in 1 2; do
+    HOME="$TEST_HOME" PATH="$TEST_ROOT/bin:$PATH" ENTORNO_TOOLS_ROOT="$SOURCE_TOOLS" \
+      NVIM_XDG_ROOT="$PROJECT_ROOT/.xdg/$ENTORNO_NVIM_VERSION" \
+      ENTORNO_PERFIL_GUARDADO="$TEST_ROOT/perfil-alumno" \
+      "$PROJECT_ROOT/scripts/instalar-alumno.sh" --yes --perfil "$perfil" \
+      >"$TEST_ROOT/instalador-$perfil-$intento.log"
+  done
+done
+grep -q 'INSTALACION PREPARADA' "$TEST_ROOT/instalador-dwec-1.log"
+grep -q 'Ortografía: español e inglés' "$TEST_ROOT/instalador-dwec-1.log"
+grep -q 'Node .* ya esta instalado y verificado' "$TEST_ROOT/instalador-dwec-2.log"
+grep -q 'Servidores LSP web ya instalados' "$TEST_ROOT/instalador-dwec-2.log"
+grep -q 'Plugins Neovim ya instalados' "$TEST_ROOT/instalador-dwec-2.log"
+grep -q 'INSTALACION PREPARADA' "$TEST_ROOT/instalador-alumno-1.log"
+[ "$(sed -n '1p' "$TEST_ROOT/perfil-alumno")" = alumno ]
+grep -q 'Bash Language Server ya esta instalado' "$TEST_ROOT/instalador-alumno-2.log"
+grep -q 'Pyright ya esta instalado' "$TEST_ROOT/instalador-alumno-2.log"
 
 printf '%s\n' "Comprobacion de instalacion aislada correcta."

@@ -1,0 +1,150 @@
+#!/bin/sh
+entorno_color_reset= entorno_color_ok= entorno_color_aviso= entorno_color_error=
+if [ -t 1 ] && [ "${TERM:-dumb}" != dumb ] && [ -z "${NO_COLOR:-}" ]; then
+  entorno_color_reset=$(printf '\033[0m')
+  entorno_color_ok=$(printf '\033[32m')
+  entorno_color_aviso=$(printf '\033[33m')
+  entorno_color_error=$(printf '\033[31m')
+fi
+entorno_version_repo() {
+  sed -n '1p' "$PROJECT_ROOT/VERSION"
+}
+entorno_banner() {
+  if [ -t 1 ] && [ "${TERM:-dumb}" != dumb ]; then
+    printf '\033[2J\033[H'
+  fi
+  printf '%s' "$entorno_color_ok"
+  cat <<'BANNER'
+██╗  ███████╗  ██╗
+██║  ██╔════╝  ██║
+██║  █████╗    ██║
+██║  ██╔══╝    ██║
+██║  ██║       ███████╗
+╚═╝  ╚═╝       ╚══════╝
+BANNER
+  printf '%s\n' "$entorno_color_reset"
+  printf 'ENTORNO-NVIM v%s | %s\n' "$(entorno_version_repo)" "$1"
+  printf '%s\n\n' 'Neovim · Node · LSP · tmux · búsqueda · Git'
+}
+entorno_confirmar_inicio() {
+  printf '\n%s\n' 'ELIJA LA FORMA DE INSTALAR'
+  printf '%s\n' '  SIN --sistema: instala componentes locales en el repositorio.'
+  printf '%s\n' '  CON --sistema: ademas ofrece instalar los paquetes del sistema que falten.'
+  printf '%s\n' '    Ejemplos: Git, tmux, fzf, fd/fdfind, ripgrep, Lazygit, curl,' '    unzip, compilador y navegador para PDF; tambien ofrece opcionales' '    como Pandoc y Poppler si faltan y el gestor los admite.'
+  printf '%s\n' '    Comando: ./scripts/instalar.sh --sistema'
+  printf '%s\n' '  --sistema muestra el comando del gestor y pide permiso antes de sudo.'
+  printf '%s\n' '  Neovim, Node, plugins y LSP se preparan localmente en ambos modos.'
+  printf '\n%s\n' 'ANTES DE COMENZAR'
+  printf '  Modalidad: %s\n' "$1"
+  printf '%s\n' '  - Comprobara requisitos y reutilizara lo ya instalado.' '  - Descargara los componentes locales que falten dentro del repositorio.' '  - Preparara plugins y servidores de lenguaje de la modalidad elegida.'
+  if [ "$sistema_auto" -eq 1 ]; then
+    printf '%s\n' '  - Si faltan paquetes del sistema, mostrara el comando y pedira permiso para sudo.'
+  else
+    printf '%s\n' '  - MODO LOCAL: no instalara paquetes del sistema ni ejecutara sudo.'
+    printf '%s\n' '  - Si falta un requisito imprescindible del sistema, se detendra.'
+    printf '%s\n' '  Para ofrecer tambien la instalacion de esos paquetes, cancele y use:'
+    printf '%s\n' '    ./scripts/instalar.sh --sistema'
+  fi
+  printf '%s\n' '  - No sustituira su configuracion habitual ni el comando nvim.'
+  printf '%s\n' '  - Preparara el entorno completo, incluidos parsers y requisitos para Markdown/PDF.'
+  if [ "$inicio_sin_pausa" -eq 1 ]; then
+    printf '\n%s\n' '[INFO] Inicio sin pausa solicitado con --yes.'
+    return 0
+  fi
+  if [ ! -t 0 ]; then
+    printf '%s\n' 'No hay entrada interactiva. Use --yes si desea iniciar sin pausa.' >&2
+    return 1
+  fi
+  printf '\n%s\n' '  Enter confirma el inicio; no autoriza sudo ni activa --sistema.'
+  printf '\n%s' 'Pulse Enter para comenzar, o Ctrl+C para cancelar: '
+  IFS= read -r inicio_respuesta || return 1
+  if [ -n "$inicio_respuesta" ]; then
+    printf '%s\n' 'Cancelado: solo Enter confirma el inicio.'
+    exit 0
+  fi
+}
+entorno_fase() {
+  entorno_fase_actual=$1
+  printf '\n%s[EN CURSO] %s%s\n' "$entorno_color_aviso" "$entorno_fase_actual" "$entorno_color_reset"
+}
+entorno_instalacion_salida() {
+  entorno_salida_codigo=$?
+  trap - 0
+  if [ "$entorno_salida_codigo" -ne 0 ]; then
+    printf '\n%s[ERROR] INSTALACION O COMPROBACION INCOMPLETA (codigo %s)%s\n' "$entorno_color_error" "$entorno_salida_codigo" "$entorno_color_reset" >&2
+    printf 'Fase que no termino: %s\n' "${entorno_fase_actual:-inicio}" >&2
+    printf '%s\n' 'Revise el error o los requisitos pendientes indicados justo arriba.' 'No se confirma que todo este instalado. Resuelva el aviso y repita el comando.' >&2
+  fi
+  exit "$entorno_salida_codigo"
+}
+# Se llama solo despues de completar las fases y comprobaciones del instalador.
+entorno_resumen_instalacion() {
+  resumen_perfil=$1
+  resumen_tipo=$2
+  printf '\n%s\n' '================================================================'
+  if [ -n "${faltan_opcionales:-}" ] && [ "$resumen_tipo" = completa ]; then
+    printf '%s[AVISO] PREPARADA CON OPCIONALES PENDIENTES%s\n' "$entorno_color_aviso" "$entorno_color_reset"
+  else
+    printf '%s[OK] INSTALACION PREPARADA%s\n' "$entorno_color_ok" "$entorno_color_reset"
+  fi
+  printf '%s\n' '================================================================'
+  printf '  Version del entorno: %s\n' "$(entorno_version_repo)"
+  printf '  Perfil: %s | Modalidad: %s\n' "$resumen_perfil" "$resumen_tipo"
+  printf '  Repositorio: %s\n\n' "$PROJECT_ROOT"
+  printf '%s\n' '  [##########] Neovim y Node: fases completadas'
+  printf '%s\n' '  [##########] Plugins: revisiones del lockfile preparadas'
+  printf '%s\n' '  [##########] Servidores de lenguaje: fase completada'
+  if [ "${entorno_ortografia_ok:-1}" -eq 1 ]; then
+    printf '%s\n' '  [##########] Ortografía: español e inglés'
+  else
+    printf '%s[AVISO] Ortografía solo en inglés: no se pudo descargar el diccionario español%s\n' "$entorno_color_aviso" "$entorno_color_reset"
+  fi
+  if [ "$resumen_tipo" = completa ]; then
+    printf '%s\n' '  [##########] Tree-sitter: herramientas y parsers preparados'
+    if [ -n "${faltan_opcionales:-}" ]; then
+      printf '%s\n' '  [AVISO] Hay herramientas opcionales pendientes:'
+      imprimir_lista "$faltan_opcionales"
+      printf '%s\n' '          Consulte los avisos anteriores para PDF y otras funciones.'
+    else
+      printf '%s\n' '  [OK] No faltan paquetes opcionales detectados en la comprobación inicial'
+    fi
+  else
+    printf '%s\n' '  [##########] Arranque aislado de Neovim comprobado'
+    if [ "${entorno_lanzador_ok:-1}" -eq 1 ]; then
+      printf '%s\n' '  [OK] Lanzador entorno-dev preparado en ~/.local/bin'
+    else
+      printf '%s[AVISO] Comando entorno-dev sin actualizar: vea el aviso anterior%s\n' "$entorno_color_aviso" "$entorno_color_reset"
+    fi
+    printf '%s\n' '  [INFO] Este perfil no instala las herramientas de Markdown/PDF'
+  fi
+  if [ "$resumen_tipo" = alumnado ]; then
+    printf '\n'
+    printf '%s\n' '  EMPIECE AQUI:' '    cd /ruta/a/mi-proyecto' '    entorno-dev .'
+    printf '%s\n' '  Si la terminal no encuentra entorno-dev, desde esta carpeta:' '    ./bin/entorno-dev /ruta/a/mi-proyecto'
+  else
+    printf '\n%s\n' '  EMPIECE AQUI (desde la carpeta del repositorio):'
+    printf '    ./bin/entorno-dev --perfil %s --sin-ia /ruta/a/mi-proyecto\n' "$resumen_perfil"
+  fi
+  printf '\n'; printf '%s\n' '  SOLO EL EDITOR:' '    ./scripts/arrancar.sh /ruta/a/archivo'
+  printf '\n'; printf '%s\n' '  DENTRO DE NEOVIM:' '    Esc y Espacio ?   Ayuda de teclas' '    Espacio e        Explorador' '    Espacio w        Guardar' '    :bd              Cerrar archivo sin salir'
+  printf '\n%s\n' '  COMANDOS EN EL PATH:'
+  if [ "${entorno_lanzador_ok:-1}" -eq 0 ]; then
+    printf '%s\n' '    [AVISO] entorno-dev no se ha actualizado; use ./bin/entorno-dev.'
+  elif [ "$resumen_tipo" = completa ]; then
+    printf '%s\n' '    Lanzador entorno-dev preparado en ~/.local/bin.'
+  fi
+  case ":$PATH:" in
+    *":$HOME/.local/bin:"*) printf '%s\n' '    Puede usar entorno-dev desde cualquier carpeta.' ;;
+    *) printf '%s\n' '    Falta ~/.local/bin en el PATH de esta terminal.' '    Bash/Zsh: export PATH="$HOME/.local/bin:$PATH"' '    Fish: fish_add_path "$HOME/.local/bin"' '    Para Bash/Zsh, conserve la linea en ~/.bashrc o ~/.zshrc.' ;;
+  esac
+  printf '%s\n' '    nvim no se sustituye automaticamente.'  '    Activacion opcional de nvim y su configuracion: README.md.'
+  if [ "$resumen_tipo" = alumnado ]; then
+    printf '\n%s\n' '  ACTUALIZAR: ./scripts/actualizar.sh'
+  else
+    printf '\n%s\n' '  ACTUALIZAR: ./scripts/actualizar.sh --completo'
+  fi
+  printf '%s\n' '  Lazygit utiliza la version del sistema; no se actualiza aqui.'
+  printf '%s\n' '  La IA es opcional: no se instalan clientes ni credenciales.'
+  printf '%s\n' '  Documentacion: README.md y docs/alumno.md'
+  printf '%s\n\n' '================================================================'
+}

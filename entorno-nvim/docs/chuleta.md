@@ -1,3 +1,5 @@
+<img src="../IMG/logo.png" alt="entorno-nvim · IFL" width="560">
+
 # Chuleta diaria
 
 Para la referencia extensa: [guía completa de teclas y uso](guia-completa-teclas.md),
@@ -12,7 +14,7 @@ el enlace opcional instalado. `:EntornoInfo` muestra lo que falta preparar.
 ## TMUX
 
 En la pantalla inicial, `e` abre el explorador. En Neovim, `Espacio e`
-tambien lo abre; se conservan `Espacio e e` y `Espacio e f`.
+tambien lo abre; `Espacio E` localiza el archivo actual.
 `Espacio e` espera brevemente por si completa una de esas secuencias.
 El diagnostico flotante pasa a `Espacio l d`.
 En el explorador nativo, `Espacio e` tambien cierra y devuelve el archivo
@@ -74,8 +76,8 @@ procesos de ese proyecto, guardar primero y usar `Ctrl-a Q`, confirmando.
 
 | Acción | Tecla |
 | --- | --- |
-| Guardar / salir | `<leader>w` / `<leader>q` |
-| Duplicar línea | `<leader>d` |
+| Guardar / salir | `<leader>w` / `:q` |
+| Duplicar línea | `<leader>td` (o `yyp`) |
 | Mover línea o selección (Linux) | `Alt-Shift-j/k` |
 | Mover línea o selección (macOS) | `Cmd-Shift-↓/↑` |
 | Buscar archivo / texto | dashboard `f` / `g` |
@@ -86,6 +88,9 @@ procesos de ese proyecto, guardar primero y usar `Ctrl-a Q`, confirmando.
 | Ver mensaje del error | `<leader>ld` |
 | Error anterior / siguiente | `[d` / `]d` |
 | Volver al dashboard | `:IFL` |
+| Ver archivos abiertos | Barra superior; el actual aparece resaltado y `[+]` indica cambios sin guardar |
+| Cambiar entre archivos abiertos | Clic en su nombre, `]b` / `[b`, o `Espacio f b` |
+| Cerrar el archivo actual | `:bdelete` (no descarta cambios sin guardar) |
 
 ### Moverse
 
@@ -151,7 +156,7 @@ párrafo.
 | --- | --- |
 | `Alt-Shift-j` / `Alt-Shift-k` | Mover línea o selección abajo/arriba (Linux) |
 | `Cmd-Shift-↓` / `Cmd-Shift-↑` | Lo mismo en macOS |
-| `<leader>d` | Duplicar la línea actual |
+| `<leader>td` | Duplicar la línea actual |
 | `ddp` / `ddkP` | Bajar/subir la línea actual con `dd` + pegar |
 | `:m .+1` / `:m -2` | Mover la línea con comando |
 

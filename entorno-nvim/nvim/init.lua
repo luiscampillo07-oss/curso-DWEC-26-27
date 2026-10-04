@@ -8,7 +8,9 @@ vim.g.maplocalleader = "\\"
 require("config.profile").setup()
 require("config.paths").setup_tool_path()
 require("config.options")
+require("config.tabline").setup()
 require("config.keymaps")
+require("config.help").setup()
 require("config.autocmds")
 require("config.lazy")
 if not require("config.lazy").available then

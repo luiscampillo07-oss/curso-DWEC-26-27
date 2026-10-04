@@ -1,6 +1,5 @@
-
-precioFinal(precio: number, descuento: number): number| null {
-  if(!Number.isFinite(precio) || !Number.isFinite(descuento)) {
+function precioFinal(precio: number, descuento: number): number | null {
+  if (!Number.isFinite(precio) || !Number.isFinite(descuento)) {
     return null
   }
 
@@ -20,12 +19,22 @@ const casos: Array<[number, number]> = [
   [50, 0]
 ]
 
-for ( const [precio, descuento] of casos) {
+
+export function ejercicio05(): void {
+  for (const [precio, descuento] of casos) {
+    const resultado = precioFinal(precio, descuento)
+    const mensaje = resultado !== null ? `Precio final: ${resultado}` : `Dato invalido`
+    console.log(`El precio de la entrada es: [${precio}, ${descuento}] -> ${mensaje}`)
+  }
+}
+/*
+  for ( const [precio, descuento] of casos) {
   const resultado = precioFinal(precio, descuento)
   const mensaje = resultado !== null ? `Precio final: ${resultado}` : `Dato invalido`
   console.log(`El precio de la entrada es: [${precio}, ${descuento}] -> ${mensaje} `)
 }
 
 export function ejercicio05(): void {
-  console.log(precioFinal(casos)
+  console.log(precioFinal(casos))
 }
+*/

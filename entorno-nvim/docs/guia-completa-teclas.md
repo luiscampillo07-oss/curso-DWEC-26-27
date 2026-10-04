@@ -1,3 +1,5 @@
+<img src="../IMG/logo.png" alt="entorno-nvim · IFL" width="560">
+
 # Guía completa de teclas y uso del entorno
 
 Referencia del repositorio revisada el 13 de septiembre de 2026.
@@ -29,23 +31,25 @@ posibles de Vim, Git, Bash o de cada cliente de IA.
 Desde la carpeta del trabajo:
 
 ```bash
-/home/isaiasfl/Work/entorno-nvim/bin/entorno-dev
+entorno-dev
 ```
 
-En otro equipo, sustituir esa ruta por la ubicación del repositorio.
-El nombre corto `entorno-dev` solo funciona si está instalado en el PATH.
+`entorno-dev` es el comando recomendado desde cualquier carpeta. Ambos
+instaladores preparan el lanzador en `~/.local/bin`. Si aparece «command not
+found», consulte [preparar el comando](../README.md#usar-entorno-dev-desde-cualquier-carpeta).
+No necesita escribir la ruta del repositorio cada vez.
 
 ```bash
 # Otra carpeta; las opciones van antes de la ruta
-/home/isaiasfl/Work/entorno-nvim/bin/entorno-dev /ruta/proyecto
+entorno-dev /ruta/proyecto
 # Solo editor
-/home/isaiasfl/Work/entorno-nvim/bin/entorno-dev --sin-tmux
+entorno-dev --sin-tmux
 # Sin integración ni panel IA
-/home/isaiasfl/Work/entorno-nvim/bin/entorno-dev --sin-ia
+entorno-dev --sin-ia
 # Selector de proyectos
-/home/isaiasfl/Work/entorno-nvim/bin/entorno-dev --elegir
+entorno-dev --elegir
 # Ayuda del lanzador
-/home/isaiasfl/Work/entorno-nvim/bin/entorno-dev --help
+entorno-dev --help
 ```
 
 Sin opciones y sin variables de perfil heredadas: perfil profesor y tres
@@ -66,13 +70,15 @@ no reconstruye sus ventanas ni reinicia los editores.
 La ayuda de tmux se organiza por categorías: `Enter` abre, `Esc` vuelve,
 `q` cierra. Es una chuleta, no ejecuta las acciones descritas. Puede mostrar
 funciones no habilitadas en un perfil reducido.
+Para cerrar una ventana de ayuda de Neovim, use `:helpclose`; `:q` actúa sobre
+la ventana actual y puede cerrar el editor si ya no está en la ayuda.
 
 ## Cómo leer las teclas
 
 - `Ctrl+a`: mantener Ctrl mientras se pulsa a.
 - `Ctrl+a` → `t`: pulsar Ctrl+a, soltar y después t.
 - `Espacio e`: pulsar Espacio y después e, sin mantenerlos juntos.
-- `Espacio e e`: Espacio, e, e. El líder de Neovim es Espacio.
+- `Espacio e`: Espacio y después e. El líder de Neovim es Espacio.
 - Las mayúsculas importan: `p` y `P` son acciones distintas.
 - Los comandos que empiezan por `:` se escriben dentro de Neovim y se
   confirman con `Enter`, salvo que se indique el indicador de comandos de tmux.
@@ -115,20 +121,25 @@ Estas teclas sueltas solo tienen este significado en el inicio IFL:
 | Tecla | Modo | Acción |
 | --- | --- | --- |
 | `Espacio w` | Normal | Guardar archivo |
-| `Espacio q` | Normal | Cerrar ventana; no fuerza pérdida de cambios |
-| `Espacio h` | Normal | Limpiar resaltado de búsqueda |
-| `Espacio d` | Normal | Duplicar línea debajo |
-| `Espacio e` / `Espacio e e` | Normal | Mostrar/ocultar explorador |
-| `Espacio e f` | Normal | Localizar archivo actual en el árbol |
+| `Esc` | Normal | Limpiar resaltado de búsqueda |
+| `Espacio t d` | Normal | Duplicar línea debajo (`yyp`); `Espacio t` agrupa más operaciones de texto |
+| `Espacio r` | Normal | Ejecutar el archivo actual en la terminal de abajo |
+| `Espacio s` | Normal | Lista de plantillas con buscador |
+| `Espacio b` | Normal | Archivos abiertos: lista, siguiente, anterior, cerrar |
+| `Espacio e` | Normal | Mostrar/ocultar explorador |
+| `Espacio E` | Normal | Localizar archivo actual en el árbol |
 | `Espacio f f` | Normal | Buscar archivos |
 | `Espacio f g` | Normal | Buscar texto del proyecto |
 | `Espacio f b` | Normal | Elegir buffer |
 | `Espacio g g` | Normal | Abrir LazyGit |
 | `Espacio u l` | Normal | Alternar caracteres invisibles |
 | `Espacio u t` | Normal | Elegir Catppuccin, Tokyo Night o Kanagawa |
-| `Espacio l d` | Normal | Diagnóstico flotante |
+| `Espacio` y esperar | Normal/visual | Ver las teclas disponibles y sus descripciones |
+| `gl` | Normal | Diagnósticos de la línea actual |
+| `Espacio l d` | Normal | Diagnósticos de todo el archivo |
 | `]d` / `[d` | Normal | Diagnóstico siguiente/anterior |
 | `Espacio l f` | Normal con LSP | Solicitar formato al servidor |
+| `Espacio l j` | Normal con LSP JS/TS | Generar documentación de la función |
 | `Espacio m p` / `Espacio m v` | Normal, profesor | PDF / PDF y visor |
 | `Espacio a c` | Normal o visual, IA activa | Preparar contexto y petición para el agente |
 | `jk` | Inserción | Volver a normal; escribir las dos letras seguidas |
@@ -173,6 +184,34 @@ Estas teclas sueltas solo tienen este significado en el inicio IFL:
 Se pueden anteponer números: `5j`, `3dd`, `2yy`. Los registros internos no
 son necesariamente el portapapeles del escritorio. `"+y` en visual copia al
 portapapeles y `"+p` pega si hay proveedor de portapapeles disponible.
+
+Para cambiar apariciones iguales sin un plugin de multicursor, coloque el
+cursor sobre la palabra y use `*` para buscar las siguientes; `cgn` cambia la
+siguiente coincidencia y `.` repite el cambio en la siguiente. Para sustituir
+todas las apariciones de una vez, use `:%s/palabra/otra/gc` y confirme
+cada una. `Ctrl+d` en este editor conserva su función de bajar media pantalla;
+la selección de ocurrencias con `Ctrl+d` de VS Code no está configurada.
+
+### Ayuda por teclas y snippets
+
+Pulsa `Espacio` y espera medio segundo para ver las acciones disponibles; las
+teclas `g`, `[` y `]` también muestran sus comandos. En insertar, `Ctrl+x`
+muestra las opciones de completado.
+
+Los snippets propios están en `nvim/snippets/`, con un archivo JSON por tipo de
+archivo. En TypeScript, escribe `cabts` y pulsa `Ctrl+j` para insertar una
+cabecera, `docfn` justo encima de una función para generar su JSDoc con los
+nombres de parámetros reales; en HTML, `!` y `Ctrl+j` insertan un
+documento HTML5. Durante la edición, `Ctrl+l` y `Ctrl+h` avanzan y retroceden
+por los campos; `Esc` o `Ctrl+c` terminan la plantilla y eliminan sus marcas.
+Los campos vacíos no muestran puntos ni cuadrados. Los archivos usan la forma
+`prefix`/`body`/`description` de los snippets de VS Code, aunque las
+transformaciones y el campo `scope` de VS Code no se aplican automáticamente.
+
+En JavaScript y TypeScript también puede escribir `/**` justo encima de una
+función y pulsar `Enter`, o usar `Espacio l j` desde la línea de la función.
+El servidor TypeScript genera los nombres de parámetros y el retorno cuando
+corresponde; el alumno rellena las descripciones. Requiere el servidor activo.
 
 ### Guardar, buscar y sustituir
 
@@ -277,14 +316,17 @@ Para resultados quickfix: `:copen`, `:cnext`, `:cprev`, `:cclose`.
 | Pestaña número 2 | `2gt` |
 | Cerrar pestaña | `:tabclose` |
 | Mover pestaña al final | `:tabmove` |
-| Mostrar buffers | `:ls` o `Espacio f b` |
-| Buffer siguiente/anterior | `:bnext` / `:bprevious` |
+| Mostrar buffers | Barra superior, `:ls` o `Espacio f b` |
+| Buffer siguiente/anterior | `]b` / `[b` o `:bnext` / `:bprevious` |
 | Elegir buffer por número | `:buffer 3` |
 | Buffer alternativo | `Ctrl+^` (según teclado) |
 | Cerrar buffer | `:bdelete`; no forzar si hay cambios |
 
-No hay una barra gráfica de pestañas tipo IDE añadida por el proyecto.
-Una pestaña Neovim puede mostrar varias ventanas y varios archivos.
+La barra superior muestra los buffers de archivo, resalta el actual y marca
+con `[+]` los cambios sin guardar. Permite abrir un archivo con clic izquierdo;
+los buffers sin nombre no aparecen. Usa funciones nativas y no instala plugins.
+Una pestaña Neovim puede mostrar varias ventanas y varios archivos; la barra
+superior muestra archivos, no las pestañas de Neovim.
 
 ## Autocompletado y lenguajes
 

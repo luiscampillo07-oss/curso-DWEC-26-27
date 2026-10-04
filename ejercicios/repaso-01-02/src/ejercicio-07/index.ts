@@ -17,5 +17,5 @@ function etiquetasDisponibles(catalogo: Producto[]): string[] {
   return catalogo.filter((producto) => !producto.rebajado).map((producto) => `${producto.id} · ${producto.nombre} · ${producto.precio} €`)
 }
 export function ejercicio07(): void {
-  console.log(etiquetasDisponibles(productos)
+  console.log(etiquetasDisponibles(productos))
 }

@@ -2,13 +2,49 @@ return {
   {
     "nvim-mini/mini.nvim",
     commit = "a995fe9cd4193fb492b5df69175a351a74b3d36b",
-    event = "InsertEnter",
+    event = "VeryLazy",
     config = function()
       require("mini.pairs").setup({
         modes = {
           insert = true,
           command = false,
           terminal = false,
+        },
+      })
+
+      require("config.snippets").setup()
+
+      local clue = require("mini.clue")
+      clue.setup({
+        -- Ancho según el texto: las descripciones no se cortan con "…".
+        window = { delay = 500, config = { width = "auto" } },
+        triggers = {
+          { mode = "n", keys = "<Leader>" },
+          { mode = "x", keys = "<Leader>" },
+          { mode = "n", keys = "[" },
+          { mode = "n", keys = "]" },
+          { mode = "n", keys = "g" },
+          { mode = "x", keys = "g" },
+          { mode = "i", keys = "<C-x>" },
+          { mode = "n", keys = "<C-w>" },
+          { mode = "n", keys = '"' },
+          { mode = "n", keys = "'" },
+          { mode = "n", keys = "z" },
+        },
+        clues = {
+          clue.gen_clues.builtin_completion(),
+          clue.gen_clues.g(),
+          clue.gen_clues.square_brackets(),
+          clue.gen_clues.windows(),
+          clue.gen_clues.z(),
+          { mode = "n", keys = "<Leader>b", desc = "+Archivos abiertos" },
+          { mode = "n", keys = "<Leader>f", desc = "+Buscar" },
+          { mode = "n", keys = "<Leader>t", desc = "+Texto y edición" },
+          { mode = "n", keys = "<Leader>g", desc = "+Git" },
+          { mode = "n", keys = "<Leader>l", desc = "+Código y errores" },
+
+          { mode = "n", keys = "<Leader>o", desc = "+Ortografía" },
+          { mode = "n", keys = "<Leader>u", desc = "+Aspecto y opciones" },
         },
       })
     end,

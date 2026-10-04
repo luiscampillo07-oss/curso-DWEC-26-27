@@ -17,17 +17,23 @@ assert(package.loaded["config.completion"], "config.completion no se cargo")
 assert(package.loaded["lspconfig"] == nil, "no debe cargarse la API antigua de lspconfig")
 
 local diagnostic_config = vim.diagnostic.config()
-assert(type(diagnostic_config.virtual_text) == "table", "los mensajes de diagnostico deben ser visibles")
-assert(diagnostic_config.virtual_text.prefix == "●", "el diagnostico visible usa un prefijo inesperado")
+assert(type(diagnostic_config.virtual_text) == "table" and diagnostic_config.virtual_text.current_line == true,
+  "el mensaje en línea debe limitarse a la línea del cursor")
+assert(diagnostic_config.float.border == "rounded", "los diagnósticos deben tener borde legible")
 assert(diagnostic_config.underline == true, "los diagnosticos deben subrayar el problema")
-assert(diagnostic_config.signs == true, "los diagnosticos deben conservar signos en el margen")
+assert(diagnostic_config.signs == true or type(diagnostic_config.signs) == "table", "los diagnosticos deben conservar signos en el margen")
 assert(diagnostic_config.update_in_insert == false, "los diagnosticos no deben cambiar mientras se escribe")
 
-for _, name in ipairs({ "ts_ls", "html", "cssls", "jsonls", "tailwindcss", "lua_ls", "pyright", "bashls", "basedpyright" }) do
+local enabled_names = { "ts_ls", "html", "cssls", "jsonls", "tailwindcss", "lua_ls", "pyright", "bashls",
+  "dockerls", "docker_compose_language_service" }
+for _, name in ipairs(vim.list_extend(vim.deepcopy(enabled_names), { "basedpyright" })) do
   assert(type(vim.lsp.config[name]) == "table", "falta la configuracion de catalogo " .. name)
-  local should_be_enabled = vim.tbl_contains({ "ts_ls", "html", "cssls", "jsonls", "tailwindcss", "lua_ls", "pyright" }, name)
+  local should_be_enabled = vim.tbl_contains(enabled_names, name)
   assert(vim.lsp.is_enabled(name) == should_be_enabled, "estado de activacion incorrecto para " .. name)
 end
+
+assert(vim.lsp.config.ts_ls.init_options.locale == "es", "TypeScript debe dar los mensajes en español")
+assert(vim.g.entorno_formatear_al_guardar == true, "el formato al guardar debe estar activo por defecto")
 
 local python_bin = vim.env.ENTORNO_NVIM_LSP_PYTHON_BIN
 local pyright_config = vim.lsp.config.pyright
@@ -95,7 +101,10 @@ require("config.lsp").attach(bufnr)
 for lhs, description in pairs({
   gd = "LSP: Ir a la definicion",
   gD = "LSP: Ir a la declaracion",
-  [" lf"] = "LSP: Formatear buffer",
+  [" lf"] = "Formatear archivo",
+  [" lg"] = "Ir a la definición (gd)",
+  [" lk"] = "Ver documentación del símbolo (K)",
+  [" la"] = "Arreglos y acciones rápidas (gra)",
 }) do
   local item = mapping("n", lhs)
   assert(item.desc == description, lhs .. " no tiene la descripcion LSP esperada")

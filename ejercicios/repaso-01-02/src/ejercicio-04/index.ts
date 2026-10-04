@@ -14,21 +14,21 @@ const productos: Producto[] = [
 ]
 function buscarProducto(catalogo: Producto[], id: number): Producto | null {
   const encontrado = catalogo.find((p) => p.id === id)
-  if(!encontrado){
+  if (!encontrado) {
     return null
   }
 
   return encontrado
 }
 const producto = buscarProducto(productos, 3)
-if(producto !== null) {
+if (producto !== null) {
   console.log(`Encontrado: ${producto.nombre}, Precio= ${producto.precio}€`)
-}else{
+} else {
   console.log(`Producto no encontrado`)
 }
 
 export function ejercicio04(): void {
-  const resultado = buscarProducto(productos,4)
+  const resultado = buscarProducto(productos, 4)
   console.log(resultado)
 }
 

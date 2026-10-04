@@ -1,6 +1,8 @@
+<img src="IMG/logo.png" alt="entorno-nvim · IFL" width="560">
+
 # Chuleta de comandos: entorno IFL, tmux y Neovim
 
-Guía básica para trabajar con el entorno de Sistemas Informáticos. En los
+Guía básica para trabajar con los perfiles DWEC y Sistemas Informáticos. En los
 atajos escritos como `Ctrl-a d`, pulse primero `Ctrl+a`, suelte las teclas y
 después pulse `d`. En Neovim, `Espacio` es la tecla líder.
 
@@ -11,12 +13,13 @@ después pulse `d`. En Neovim, `Espacio` es la tecla líder.
 ```bash
 git clone https://github.com/isaiasfl/entorno-nvim.git
 cd entorno-nvim
-./scripts/instalar-alumno.sh --sistema
+./scripts/instalar-alumno.sh
 ```
 
-El instalador muestra el comando del gestor de paquetes y pide permiso antes de
-usar `sudo`. Prepara Git, tmux, búsqueda, Neovim, Node 24, Bash Language Server,
-ShellCheck, Pyright, plugins y el comando `entorno-dev`.
+Instala lo mismo para DWEC y SI: Git, tmux, búsqueda, Neovim, Node 24,
+plugins y los servidores de HTML, CSS, JSON, JavaScript, TypeScript, React,
+Tailwind, Bash (con ShellCheck), Python, Dockerfile y Docker Compose. Si faltan
+programas del sistema, muestra el comando y pregunta antes de usar `sudo`.
 
 No sustituye `~/.config/nvim` ni `~/.tmux.conf`. Tampoco instala o configura
 cuentas de inteligencia artificial.
@@ -25,9 +28,8 @@ cuentas de inteligencia artificial.
 
 | Orden | Resultado |
 | --- | --- |
-| `./scripts/instalar-alumno.sh --sistema` | Instala también los paquetes del sistema que falten, previa confirmación |
-| `./scripts/instalar-alumno.sh` | Prepara componentes locales; se detiene si faltan paquetes del sistema |
-| `./scripts/instalar-alumno.sh --comprobar` | Comprueba el estado sin modificar nada |
+| `./scripts/instalar-alumno.sh` | Instala o completa el entorno |
+| `./scripts/instalar-alumno.sh --comprobar` | Comprueba la instalación sin modificar nada |
 | `./scripts/instalar-alumno.sh --help` | Muestra la ayuda |
 
 Si la terminal todavía no reconoce `entorno-dev`, ejecute:
@@ -38,34 +40,39 @@ export PATH="$HOME/.local/bin:$PATH"
 
 ### Actualizar una instalación existente
 
+Guarde su trabajo y ejecute:
+
 ```bash
 cd ~/entorno-nvim
-git pull
-./scripts/instalar-alumno.sh --sistema
+./scripts/actualizar.sh
 ```
 
-El instalador es repetible: conserva lo que ya está preparado y completa lo
-que falte.
+Descarga la versión nueva, ofrece cerrar las sesiones abiertas y reinstala con
+su perfil. La primera vez, si su copia no tiene aún `actualizar.sh`:
+
+```bash
+cd ~/entorno-nvim
+git restore . && git pull --ff-only && sh scripts/actualizar.sh
+```
 
 ## 2. Abrir un proyecto
 
 ```bash
 cd ~/ruta/del/proyecto
-entorno-dev --perfil si --ia .
+entorno-dev .
 ```
 
 También puede indicar la ruta sin entrar antes:
 
 ```bash
-entorno-dev --perfil si --ia ~/ruta/del/proyecto
+entorno-dev ~/ruta/del/proyecto
 ```
 
 ### Opciones principales
 
 | Opción | Uso |
 | --- | --- |
-| `--perfil si` | Bash y Python para Sistemas Informáticos |
-| `--perfil dwec` | HTML, CSS, JSON, JavaScript, TypeScript y Tailwind |
+| `--perfil alumno` | Todo para el alumnado (predeterminado tras instalar) |
 | `--perfil inicial` | Perfil web sin diagnósticos |
 | `--perfil profesor` | Perfil completo del profesor |
 | `--ia` | Crea el panel de agente y habilita la integración |
@@ -119,7 +126,7 @@ se pulsa la acción.
 | Objetivo | Acción |
 | --- | --- |
 | Salir conservando editor y procesos | `Ctrl-a d` |
-| Volver a la misma sesión | Repetir `entorno-dev --perfil si --ia RUTA` |
+| Volver a la misma sesión | Repetir `entorno-dev RUTA` |
 | Cerrar el proyecto definitivamente | `Ctrl-a Q`, confirmar |
 | Listar sesiones desde la shell | `tmux -L entorno-nvim list-sessions` |
 | Cerrar todas las sesiones del entorno | `tmux -L entorno-nvim kill-server` |
@@ -230,10 +237,10 @@ confirmación para borrar. Pulse `g?` dentro del explorador para ver su ayuda.
 | Solicitar completado | `Ctrl-Espacio` |
 | Formatear con el LSP | `Espacio l f` |
 
-BashLS y ShellCheck detectan sintaxis, variables, comillas y patrones
-problemáticos. No marcan palabras arbitrarias como `ejemplo` o `saliendo`:
-para Bash son posibles nombres de comandos, funciones o alias que se resuelven
-al ejecutar.
+En DWEC, los servidores de lenguaje muestran errores de JavaScript, TypeScript,
+HTML, CSS y JSON. TypeScript aporta diagnósticos más precisos cuando el proyecto
+tiene `tsconfig.json`. El editor no ejecuta el programa por sí solo: utiliza el
+panel inferior de tmux para lanzar los comandos del proyecto.
 
 Comprobaciones de un script Bash:
 
@@ -253,7 +260,7 @@ más cómodo para ejecutar y observar el programa.
 | --- | --- |
 | No aparece el texto de un error | `Espacio l d`; actualizar el repositorio y reiniciar la sesión |
 | `entorno-dev: command not found` | `export PATH="$HOME/.local/bin:$PATH"` |
-| La ayuda emergente parpadea | Actualizar con `git pull`; el menú textual sustituye a fzf si este es incompatible |
+| La ayuda emergente parpadea | Actualizar con `./scripts/actualizar.sh`; el menú textual sustituye a fzf si este es incompatible |
 | Neovim parece atrapado escribiendo | Pulse `Esc` |
 | No sé en qué modo estoy | Pulse `Esc`; volverá con seguridad al modo normal |
 | Quiero conservarlo todo al cerrar SSH | `Ctrl-a d` antes de salir, aunque cerrar SSH también conserva tmux |

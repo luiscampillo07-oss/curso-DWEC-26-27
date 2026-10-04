@@ -297,3 +297,66 @@ la distribucion detectada. La opcion `--sistema` muestra ese comando, pide
 confirmacion por terminal y solo entonces lo ejecuta con `sudo`; nunca instala
 paquetes en silencio. `comprobar-requisitos.sh` queda como diagnostico de solo
 lectura. Se mantiene la regla de no usar `sudo` sin consentimiento explicito.
+
+## 2026-09-27: productividad y descubrimiento
+
+Se incorporan snippets propios en formato VS Code para HTML y React, sin una
+colección externa ni Emmet. Los componentes no importan React por defecto
+(runtime JSX moderno); los hooks indican el import necesario. Las plantillas
+son editables en `nvim/snippets/`. `rafce` y `rfce` incluyen export default.
+
+Se añade la dependencia directa indent-blankline.nvim, fijada por commit:
+representa cada nivel de indentación con una guía de color. La alternativa
+mini.indentscope solo representa el bloque activo; no resuelve la visualización
+de todos los niveles solicitada. No requiere herramientas externas.
+
+Los pliegues usan Tree-sitter cuando existe parser y la indentación como
+alternativa. Arrancan abiertos. La ayuda `Espacio ?` / F1 muestra operaciones
+nativas, plantillas, diagnósticos y pliegues sin multiplicar menús principales.
+
+## Docker, formato al guardar y ayuda para el alumnado (2026-09-30)
+
+Se añaden dos dependencias directas en `tools/lsp-docker`, fijadas en su
+lockfile y con la misma política pnpm que el resto (`minimumReleaseAge` de 7
+días, sin scripts de construcción aprobados):
+
+- `dockerfile-language-server-nodejs` 0.15.0 (MIT): errores y completado de
+  instrucciones en Dockerfile. Alternativa sencilla: ninguna nativa.
+- `@microsoft/compose-language-service` 1.0.0 (MIT): completado y ayuda en
+  `compose.yaml`. No valida todo el esquema; sí completa claves y servicios.
+
+Total de 17 paquetes, ninguno con scripts de instalación.
+
+El formato al guardar, antes descartado, se activa a petición del profesor.
+No añade Prettier ni conform.nvim: usa el formateo de los servidores ya
+presentes (TypeScript, HTML, CSS, JSON, Docker) y, si existen como paquetes
+del sistema, `shfmt` (vía bash-language-server) y `ruff server` para Python.
+`Espacio uf` lo desactiva. `shfmt` y `ruff` son opcionales: el instalador SI
+los ofrece solo si el gestor de paquetes los tiene.
+
+TypeScript recibe `locale = "es"` para dar sus mensajes en español. ShellCheck,
+Pyright y los servidores de Docker no tienen traducción.
+
+Si falta un servidor del perfil, Neovim avisa al abrir ese tipo de archivo:
+antes solo lo registraba `:EntornoInfo` y el alumno creía que no había errores.
+Los diagnósticos muestran letra en el margen, subrayado simple y el mensaje en
+la línea del cursor, porque Windows Terminal y tmux no dibujan undercurl.
+
+Snippets propios para Bash, Python, Dockerfile, Docker Compose y CSS, en el
+mismo formato VS Code. `compose*.yaml` se detecta como `yaml.docker-compose`.
+El menú `Espacio l` repite `gd`, `K`, `grr`, `grn` y `gra` con nombres claros.
+
+## Perfil único del alumnado y menú al estilo LazyVim (2026-09-30)
+
+Los perfiles `dwec` y `si` se unifican en `alumno`: el coste es de unos
+130 MB más en SI y ninguno en rendimiento, porque cada servidor solo arranca
+al abrir su tipo de archivo (Tailwind, además, solo si el proyecto lo usa).
+Con perfiles separados, lo que faltaba no se notaba como error: simplemente
+no se marcaba nada. `dwec` y `si` se siguen aceptando y equivalen a `alumno`.
+
+El menú de `Espacio` toma la organización de LazyVim sin copiar su código:
+`b` archivos abiertos, `f` buscar, `g` Git, `l` código, `s` plantillas,
+`t` texto (cada entrada muestra su tecla nativa para aprenderla), `r`
+ejecutar el archivo, `u` opciones. `Esc` limpia la búsqueda, como en
+LazyVim; `Espacio d`, `h` y `q` salen del primer nivel. Los avisos se
+limitan a una línea: si no caben, Neovim pide ENTER y se come las teclas.

@@ -1,8 +1,94 @@
 # Changelog
 
+## Sin publicar
+
+- **Perfil único del alumnado**: `instalar-alumno.sh` instala web, Bash,
+  Python y Docker sin preguntar. `--perfil dwec`/`si` se aceptan y equivalen.
+- Menú de `Espacio` reorganizado al estilo LazyVim: `b` archivos abiertos,
+  `t` texto y edición (con la tecla nativa entre paréntesis), `r` ejecutar
+  el archivo (Bash, Python, JS, TS) en la terminal de abajo. `Esc` limpia la
+  búsqueda; salen del menú `Espacio d`, `h` y `q` (ahora `Espacio t d`).
+- WSL: el pegado desde el portapapeles de Windows ya no deja `^M` (se quitan
+  los `\r`, receta de `:help clipboard-wsl`).
+- Comentar como en VS Code con `Ctrl+/` (línea o selección); `Espacio t c`
+  también en modo visual. El menú ajusta su ancho y no corta descripciones.
+- Avisos cortos para que Neovim no pida ENTER y no se coma teclas.
+
+- Reinstalar tras mover o borrar la carpeta del repositorio ya no falla:
+  el comando `entorno-dev` roto se redirige a la copia actual con un aviso.
+  Si apunta a otra copia existente, se pregunta antes de cambiarlo.
+- Si el comando `entorno-dev` no se puede actualizar, la instalación termina
+  con un aviso y la alternativa `./bin/entorno-dev`, no con un error genérico.
+- `instalar-alumno.sh` sin opciones muestra un menú (1 = DWEC, 2 = SI),
+  recuerda la elección y la propone con Enter al actualizar. `entorno-dev`
+  usa ese perfil por defecto.
+- El instalador de alumno pregunta antes de instalar paquetes del sistema que
+  falten, sin necesidad de `--sistema`; `--sin-sistema` lo impide.
+- Mensajes más claros ante opciones erróneas, ejecución como root o falta de
+  paquetes, con el comando exacto para continuar.
+- `scripts/actualizar.sh`: corrige finales CRLF, restaura `lazy-lock.json`,
+  ofrece cerrar sesiones antiguas, hace `git pull --ff-only` y reinstala con
+  el perfil recordado.
+- Ortografía en español e inglés (`spelllang=es,en`) en Markdown, texto y
+  commits; diccionario de Neovim verificado por SHA-256, sin hunspell.
+  Faltas en rojo (visibles en WSL y tmux) y menú `Espacio o` (corregir,
+  siguiente, añadir, activar).
+- Docker: errores y completado en Dockerfile y `compose.yaml` en todos los
+  perfiles (servidores fijados en `tools/lsp-docker`).
+- Formato automático al guardar (TS, JS, HTML, CSS, JSON, Docker; Bash con
+  shfmt y Python con ruff si están instalados). `Espacio uf` lo alterna.
+- Mensajes de TypeScript/JavaScript en español.
+- Snippets para Bash (20), Python (19), Dockerfile (9), Compose (10) y CSS (9).
+- `Espacio s`: lista de plantillas del lenguaje con buscador, sin recordar prefijos.
+- Menú `Espacio l`: definición, documentación, usos, renombrar y arreglos.
+- Aviso visible al abrir un archivo cuyo servidor no está instalado.
+- El instalador SI ofrece `shfmt` y `ruff` como recomendados opcionales.
+- `Ctrl-a Q` y `actualizar.sh` cierran Neovim de forma ordenada antes de
+  cerrar la sesión (preguntan si hay cambios sin guardar). Los swap de un
+  Neovim que ya no existe se resuelven sin la pantalla «Found a swap file»:
+  se borran si no hay cambios o se recuperan con un aviso en español.
+- Errores visibles en WSL y tmux: letra E/W en el margen, subrayado simple de
+  color y mensaje al final de la línea del cursor. La barra de estado dice
+  «Errores: 4  Avisos: 1» en lugar de `E:4 W:1`.
+- `Espacio e` abre el explorador al instante; `Espacio E` localiza el archivo
+  actual (sustituyen a `Espacio e e` y `Espacio e f`).
+- Neovim avisa si falta ShellCheck al abrir Bash: sin él no hay diagnósticos.
+- El instalador de alumno avisa si el repositorio está en `/mnt/c` en WSL2.
+- `.gitattributes` fuerza finales de línea LF aunque Git use `core.autocrlf`,
+  evitando `^M` en Neovim y archivos marcados como modificados en WSL2.
+
+## 1.1.0 — 2026-09-27
+
+- Ayuda de teclas con Espacio ? y F1, movimientos, edición, errores y snippets.
+- Snippets propios para HTML, JavaScript, TypeScript y componentes/hooks React.
+- JSDoc generado mediante TypeScript al escribir /** y Enter o Espacio lj.
+- Completado nativo solicitado al escribir letras de nombres de variables.
+- Líneas ajustadas al ancho, diagnósticos legibles en ventanas y hover delimitado.
+- Guías de indentación de colores con plugin fijado; pliegues nativos.
+- Instaladores con plan previo, Enter para iniciar, --yes para automatización,
+  fases, colores, resumen de resultados y aviso explícito de fallo.
+- README con rutas de instalación, diagrama Mermaid, opciones, actualización
+  y activación opcional del comando nvim.
+
+### Mejoras docentes incluidas desde la 1.0.0
+
+- El instalador esencial admite `--perfil dwec` e instala únicamente Node,
+  Neovim, plugins y servidores web, sin herramientas de PDF ni fixtures de
+  prueba.
+- Las terminales de las sesiones reciben el Node local verificado, por lo que
+  `node`, `npm`, `npx` y Corepack funcionan sin modificar la shell del alumno.
+- Los perfiles web exponen también el compilador `tsc` fijado por el entorno;
+  los proyectos pueden seguir declarando su propia versión de TypeScript.
+- Las instalaciones mínimas de Debian comprueban `xz-utils` y los certificados
+  TLS antes de descargar Node, evitando un fallo que podía quedar oculto en
+  sistemas WSL más completos.
+- En Debian y Ubuntu, el modo `--sistema` comprueba `apt-get`, `sudo` y los
+  certificados después de instalar, y explica cuándo debe intervenir el
+  profesor o administrador.
+
 Todos los cambios relevantes de este proyecto se documentan aquí.
 
-## En desarrollo - 2026-09-13
+### Evolución portable — 2026-09-13
 
 - primera fase del entorno docente portable: perfiles inicial, DWEC, SI y
   profesor, con IA desactivada salvo opcion expresa;

@@ -28,6 +28,25 @@ assert(package.loaded["config.keymaps"], "config.keymaps no se cargo")
 assert(package.loaded["config.autocmds"], "config.autocmds no se cargo")
 assert(package.loaded["config.lazy"], "config.lazy no se cargo")
 assert(package.loaded["config.theme"], "config.theme no se cargo")
+
+-- Ortografía: español e inglés si el diccionario está instalado; solo en texto.
+assert(mapping("n", "<leader>s").desc == "Insertar plantilla (snippet)", "Espacio s debe existir desde el arranque")
+for _, lhs in ipairs({ "<leader>oc", "<leader>on", "<leader>op", "<leader>oa", "<leader>ot" }) do
+  assert(mapping("n", lhs).desc ~= nil, "falta el atajo de ortografia " .. lhs)
+end
+for _, lhs in ipairs({ "<leader>ee", "<leader>ef" }) do
+  assert(vim.tbl_isempty(mapping("n", lhs)), lhs .. " retrasaria Espacio e")
+end
+local spell_bad = vim.api.nvim_get_hl(0, { name = "SpellBad", link = false })
+assert(spell_bad.fg and spell_bad.underline, "las faltas deben verse en color sin depender de undercurl")
+if #vim.api.nvim_get_runtime_file("spell/es.utf-8.spl", false) > 0 then
+  assert(vim.o.spelllang == "es,en", "spelllang esperado es,en: " .. vim.o.spelllang)
+  assert(vim.fn.spellbadword("canción")[1] == "", "el diccionario espanol no reconoce canción")
+  assert(vim.fn.spellbadword("house")[1] == "", "el diccionario ingles no reconoce house")
+  assert(vim.fn.spellbadword("errror")[1] ~= "", "no se detecta la falta errror")
+else
+  assert(vim.o.spelllang == "en", "sin diccionario espanol debe quedar solo en")
+end
 assert(package.loaded["config.lsp"], "config.lsp no se cargo")
 assert(package.loaded["config.completion"], "config.completion no se cargo")
 assert(package.loaded["config.markdown_pdf"], "config.markdown_pdf no se cargo")
@@ -48,14 +67,18 @@ assert(vim.o.termguicolors, "termguicolors debe estar activo")
 assert(vim.o.clipboard == "unnamedplus", "el portapapeles del sistema no esta activo")
 
 assert(mapping("n", " w").rhs:lower():find("write", 1, true), "leader+w incorrecto")
-assert(mapping("n", " q").rhs:lower():find("quit", 1, true), "leader+q incorrecto")
+assert(vim.tbl_isempty(mapping("n", " q")), "leader+q sale del menu principal")
 assert(mapping("n", "<C-h>").rhs == "<C-w>h", "Ctrl+h no cambia a la ventana izquierda")
 assert(mapping("n", "<C-j>").rhs == "<C-w>j", "Ctrl+j no cambia a la ventana inferior")
 assert(mapping("n", "<C-k>").rhs == "<C-w>k", "Ctrl+k no cambia a la ventana superior")
 assert(mapping("n", "<C-l>").rhs == "<C-w>l", "Ctrl+l no cambia a la ventana derecha")
 assert(mapping("n", "n").rhs == "nzzzv", "n no centra resultados")
 assert(mapping("n", "N").rhs == "Nzzzv", "N no centra resultados")
-assert(mapping("n", " d").rhs == "yyp", "leader+d no duplica la linea")
+assert(mapping("n", " td").rhs == "yyp", "leader+td no duplica la linea")
+assert(mapping("n", " tx").rhs == "dd", "leader+tx no borra la linea")
+assert(mapping("n", " bd").rhs:find("bdelete", 1, true), "leader+bd no cierra el archivo")
+assert(mapping("n", " r").desc == "Ejecutar este archivo", "leader+r no ejecuta el archivo")
+assert(vim.tbl_isempty(mapping("n", " d")), "leader+d se movio a leader+td")
 assert(mapping("n", "<A-S-j>").rhs:find("m .+1", 1, true), "Alt+Shift+j no mueve la linea abajo")
 assert(mapping("n", "<A-S-k>").rhs:find("m .-2", 1, true), "Alt+Shift+k no mueve la linea arriba")
 assert(mapping("x", "<A-S-j>").rhs:find("'>+1", 1, true), "Alt+Shift+j no mueve la seleccion abajo")
@@ -76,15 +99,16 @@ assert(jk.silent == 1, "jk no es silencioso")
 assert(jk.desc == "Salir del modo insertar", "descripcion de jk incorrecta")
 assert(vim.tbl_isempty(mapping("i", "kj")), "kj no debe estar mapeado")
 assert(vim.tbl_isempty(mapping("i", "<Esc>")), "Esc no debe estar remapeado en insertar")
-assert(vim.tbl_isempty(mapping("n", "<Esc>")), "Esc no debe estar remapeado en normal")
+-- En normal, Esc solo añade quitar el resaltado y conserva su efecto nativo.
+assert(mapping("n", "<Esc>").rhs == "<cmd>nohlsearch<cr><Esc>", "Esc normal debe limitarse a limpiar la busqueda")
 
 assert(vim.tbl_isempty(mapping("n", "j")), "j no debe estar remapeado")
 assert(vim.tbl_isempty(mapping("n", "k")), "k no debe estar remapeado")
 assert(vim.tbl_isempty(mapping("x", "j")), "j visual no debe estar remapeado")
 assert(vim.tbl_isempty(mapping("x", "k")), "k visual no debe estar remapeado")
 
-local clear_search = mapping("n", " h")
-assert(clear_search.rhs:lower():find("nohlsearch", 1, true), "leader+h no limpia la busqueda")
+local clear_search = mapping("n", "<Esc>")
+assert(clear_search.rhs:lower():find("nohlsearch", 1, true), "Esc no limpia la busqueda")
 
 local toggle_list = mapping("n", " ul")
 assert(toggle_list.desc == "Alternar caracteres invisibles", "leader+ul no esta configurado")
@@ -239,8 +263,7 @@ for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
 end
 
 for lhs, description in pairs({
-  [" ee"] = "Abrir o cerrar el arbol de archivos",
-  [" ef"] = "Enfocar el archivo actual en el arbol",
+  [" E"] = "Enfocar el archivo actual en el arbol",
 }) do
   local tree_mapping = mapping("n", lhs)
   assert(tree_mapping.desc == description, lhs .. " no tiene la descripcion esperada")
@@ -256,9 +279,9 @@ end
 
 local revealed_file = root .. "/README.md"
 vim.cmd("edit " .. vim.fn.fnameescape(revealed_file))
-tree_actions["<leader>ef"]()
+tree_actions["<leader>E"]()
 assert(package.loaded["nvim-tree"], "nvim-tree no se pudo cargar")
-assert(vim.bo.filetype == "NvimTree", "leader+ef no enfoco el arbol")
+assert(vim.bo.filetype == "NvimTree", "leader+E no enfoco el arbol")
 
 local tree_api = require("nvim-tree.api")
 local revealed_node = tree_api.tree.get_node_under_cursor()
@@ -329,7 +352,7 @@ assert(tree_config.ui.confirm.remove, "borrar debe pedir confirmacion")
 assert(tree_config.ui.confirm.trash, "enviar a la papelera debe pedir confirmacion")
 assert(not tree_config.ui.confirm.default_yes, "la confirmacion no debe aceptar por defecto")
 
-tree_actions["<leader>ee"]()
+require("config.navigation").explorer()
 assert(vim.bo.filetype == "NvimTree", "nvim-tree no abrio su buffer")
 
 for lhs, rhs in pairs({
@@ -356,7 +379,7 @@ for lhs, description in pairs({
   assert(tree_action.buffer == 1, lhs .. " debe ser local al buffer de nvim-tree")
 end
 
-tree_actions["<leader>ee"]()
+require("config.navigation").explorer()
 for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
   assert(vim.bo[bufnr].filetype ~= "NvimTree" or not vim.api.nvim_buf_is_loaded(bufnr), "leader+ee no cerro nvim-tree")
 end

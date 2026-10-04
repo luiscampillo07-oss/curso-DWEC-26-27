@@ -8,16 +8,18 @@ const stock: Record<string, number> = {
 function resumenStock(stock: Record<string, number>): {
   total: number
   sinStock: number
-}
-{
-  for(const clave in stock) {
-    if(Object.hasOwn(stock, clave)) {
+} {
+  let total = 0
+  let sinStock = 0
+
+  for (const clave in stock) {
+    if (Object.hasOwn(stock, clave)) {
       const cantidad = stock[clave]
       total += cantidad
       sinStock += cantidad === 0 ? 1 : 0
     }
   }
-  return {total, sinStock}
+  return { total, sinStock }
 }
 
 export function ejercicio03(): void {
