@@ -7,4 +7,5 @@ export function canBuy(list: Product[], id: number, quantity: number): boolean {
   } else {
     return product.stock >= quantity && quantity > 0;
   }
+  //return product !== undefined && quantity > 0 && quantity <= product.stock;
 }

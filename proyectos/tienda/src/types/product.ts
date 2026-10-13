@@ -11,4 +11,11 @@ export interface Product {
   stock: number;
 }
 
+export interface Summary {
+  products: number; // cuántos productos distintos hay
+  units: number;
+  // suma del stock de todos
+  value: number;
+  // suma de price × stock de cada producto
+}
 

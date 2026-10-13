@@ -1,7 +1,8 @@
 import type { Product } from "../../../types/product";
 
 export function priceOf(list: Product[], id: number): number | null {
-  const product = list.find(p => p.id === id);
+  const product = list.
+    find(p => p.id === id);
   if (product === undefined) {
     return null;
   } else {
