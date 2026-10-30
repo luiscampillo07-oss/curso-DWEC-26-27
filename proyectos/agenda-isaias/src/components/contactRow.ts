@@ -1,0 +1,1 @@
+createContactRow(c: Contact): HTMLLIElement

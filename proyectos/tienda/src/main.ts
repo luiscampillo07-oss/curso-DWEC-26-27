@@ -55,7 +55,7 @@ console.log(
 import { allInStock } from './exercises/s01-homework/ex06-think';
 console.log('ej06', allInStock([]));
 */
-
+/*
 import { products } from './data/products';
 import { totalUnits } from './exercises/s02-homework/ex01-total-units';
 import { cheapestAvailable } from './exercises/s02-homework/ex02-cheapest-available';
@@ -79,7 +79,7 @@ console.log('ej03', catalog(products));
 console.log('ej04', summary(products));
 console.log('ej04', summary([]));
 
-/*
+
 console.log('antes', products[0].name);
 products.sort((a, b) => a.price - b.price);
 console.log('después', products[0].name);

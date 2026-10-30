@@ -29,19 +29,22 @@ export function rename(list: Task[], id: number, title: string): Task[] {
 
 export const removeDone = (list: Task[], id: number): Task[] => {
 
-  // Opcion 1
+  // Opcion 1 --->
   return list.filter(t => t.id === id)[0]?.done ? list.filter(t => t.id !== id) : list;
 
   // Opcion 2 ---> !(t.id === id && t.done));
 }
 
 export function editTask(list: Task[], id: number, changes: Partial<Omit<Task, 'id'>>): Task[] {
-  return list.map(t => t.id === id ? { ...t, ...changes } : t);
+  return list.map(t => (t.id === id ? { ...t, ...changes } : t));
 }
 
+//const order: Record<tipo , valo_igual_para_todos> = {}
+const order: Record<Priority, number> = { high: 2, medium: 1, low: 0 }
+
 export function pendingByPriority(list: Task[]): string[] {
-  const high = list.filter(t => t.priority === 'high' && !t.done).map(t => t.title);
-  const medium = list.filter(t => t.priority === 'medium' && !t.done).map(t => t.title);
-  const low = list.filter(t => t.priority === 'low' && !t.done).map(t => t.title);
-  return [...high, ...medium, ...low];
+  return list
+    .filter(t => !t.done)
+    .toSorted((a, b) => order[b.priority] - order[a.priority])
+    .map(t => t.title);
 }
