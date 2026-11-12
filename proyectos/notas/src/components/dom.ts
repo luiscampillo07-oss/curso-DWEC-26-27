@@ -5,3 +5,11 @@ export function getElement<T extends Element>(selector: string, type: new () => 
   }
   return element;
 }
+
+//Crear una funcion que genere etiquetas con el texto que le paso como parametro y con un array de clases
+export function createTextSpan(text: string, cssArray: string[]): HTMLSpanElement {
+  const span = document.createElement("span");
+  span.classList.add(...cssArray);
+  span.textContent = text;
+  return span;
+}
