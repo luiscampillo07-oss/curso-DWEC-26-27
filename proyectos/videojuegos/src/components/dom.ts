@@ -88,6 +88,8 @@ export function createGameItem(game: Game, playedGame: (id: number) => void, del
 
   item.append(text, played, button);
   return item;
-}
+};
 
-;
+export function createResume(): HTMLLabelElement {
+  return document.createElement("label");
+}

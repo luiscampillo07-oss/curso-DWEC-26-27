@@ -1,16 +1,18 @@
-import { createForm, createGameItem, createList, createSearchInput, createTitle, getElement } from './components/dom';
+import { createForm, createGameItem, createList, createResume, createSearchInput, createTitle, getElement } from './components/dom';
 import { initialGames } from './services/initialGame';
 import './style.css';
 import type { AppState } from './types/game';
 
 const app = getElement("#app", HTMLDivElement);
 
-const title = "Mis juegos";
-const form = createForm();
-const search = createSearchInput();
-const list = createList();
 
 let state: AppState = { games: initialGames, search: "" };
+
+const title = "Mis juegos";
+const form = createForm();
+const labelResume = createResume();
+const search = createSearchInput();
+const list = createList();
 
 
 //DECLARACION DE FUNCIONES
@@ -33,6 +35,8 @@ function playedGame(id: number): void {
 function render(): void {
   const text = state.search.trim().toLowerCase();
   const visible = state.games.filter(g => g.title.toLowerCase().includes(text));
+
+  labelResume.textContent = `Jugados ${state.games.reduce((acc, g) => g.played ? acc + 1 : acc, 0)}`;
   const items = visible.map(game => createGameItem(game, playedGame, deleteGame));
 
   list.replaceChildren(...items);
@@ -66,4 +70,5 @@ form.addEventListener("submit", (event) => {
 
 
 //---------------Inicio de la aplicacion-----------------
-app.append(createTitle(title), form, search, list);
+app.append(createTitle(title), labelResume, form, search, list);
+render();
